@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Modal, Typography } from "@mui/material";
 import styled from "@emotion/styled";
 import { Button, DateField, Select, TextField } from "components/elements";
 import { Colors } from "styles/theme/color";
+import dayjs, { Dayjs } from "dayjs";
+import axios from "axios";
 
 interface BookingProps {
   open: boolean;
   onClose: () => void;
-  handleClick: () => void;
 }
 
 const Component = styled(Box)(
@@ -25,14 +26,65 @@ const Component = styled(Box)(
 `
 );
 
-const BookingModal: React.FC<BookingProps> = ({
-  open,
-  onClose,
-  handleClick,
-}) => {
+const BookingModal: React.FC<BookingProps> = ({ open, onClose }) => {
+  // Initialize State
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    type: "",
+    location: "",
+  });
+  const [eventDate, setEventDate] = React.useState<Dayjs | null>(
+    dayjs(new Date())
+  );
+
+  // Event on change handler
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+  };
+
+  // Clear state handler
+  const handleCancel = () => {
+    setForm({
+      name: "",
+      type: "",
+      location: "",
+    });
+    setEventDate(null);
+    setError("");
+    setLoading(false);
+    onClose();
+  };
+
   // Handle create event form
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const formData = {
+        name: form.name,
+        type: form.type,
+        event_date: eventDate,
+        location: form.location,
+        status: "Pending Review",
+      };
+
+      const response = await axios.post("/api/events/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status) {
+        setLoading(false);
+        handleCancel();
+      }
+    } catch (e: any) {
+      setLoading(false);
+      setError(e.response && e.response.data && e.response.data.message);
+    }
   };
 
   return (
@@ -48,13 +100,19 @@ const BookingModal: React.FC<BookingProps> = ({
         <form onSubmit={handleSubmit}>
           <TextField
             label="Event name"
-            placeholder="aldo.marcelino@mailinator.com"
+            name="name"
+            value={form.name}
+            handleChange={handleChange}
+            placeholder="July Healthy Fair"
             width="100%"
           />
 
           <Box marginTop="24px">
             <Select
+              name="type"
+              value={form.type}
               label="Event type"
+              handleChange={(e) => setForm({ ...form, type: e.target.value })}
               placeholder="Select event type"
               data={[
                 { id: "1", name: "Health Talk" },
@@ -62,21 +120,35 @@ const BookingModal: React.FC<BookingProps> = ({
                 { id: "3", name: "Fitness Activities" },
               ]}
               loading={false}
+              returnValue="name"
             />
           </Box>
 
           <DateField
             label="Date & Time"
-            onChange={(e) => console.log(e, "<<")}
+            value={eventDate}
+            onChange={(newValue: Dayjs | null) => setEventDate(newValue)}
           />
 
           <Box marginTop="24px">
             <TextField
+              name="location"
+              value={form.location}
+              handleChange={handleChange}
               label="Location"
               placeholder="Jl. Harbour Bay,  Kepulauan Riau 29444"
               width="100%"
             />
           </Box>
+
+          <Typography
+            variant="body2"
+            color={Colors.red100}
+            marginBottom="8px"
+            textAlign="center"
+          >
+            {error}
+          </Typography>
 
           <Box
             display="flex"
@@ -89,15 +161,15 @@ const BookingModal: React.FC<BookingProps> = ({
               padding="13px 32px"
               borderRadius="20px"
               fontSize="18px"
-              onClick={handleClick}
+              onClick={handleCancel}
               buttonType="secondary"
             />
             <Button
-              label="Submit"
+              label={loading ? "Loading..." : "Submit"}
               padding="13px 32px"
               borderRadius="20px"
               fontSize="18px"
-              onClick={handleClick}
+              disabled={loading}
               submit
             />
           </Box>

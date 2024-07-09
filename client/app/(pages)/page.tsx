@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import useSWR from "swr";
 import {
   Box,
   Table,
@@ -7,16 +8,15 @@ import {
   TableHead,
   TableRow,
   TableBody,
+  Typography,
 } from "@mui/material";
 import { Colors } from "styles/theme/color";
 import { Pagination } from "components/elements";
-import BookingModal from "components/layout/modal/book-creation-modal";
+import EventModal from "components/layout/modal/event-creation-modal";
 import TimeFormatter from "utils/time-formatter";
 import VerificationModal from "components/layout/modal/verify-action-modal";
-import { getLocalStorage } from "utils/local-storage";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { Plus } from "lucide-react";
 
 interface ListHead {
   id: number;
@@ -24,33 +24,20 @@ interface ListHead {
   align: "left" | "right" | "center" | "inherit" | "justify";
 }
 
-function createData(
-  name: string,
-  type: string,
-  event_date: Date,
-  location: string
-) {
-  return { name, type, event_date, location };
+interface dataType {
+  name: string;
+  type: string;
+  event_date: Date;
+  location: string;
 }
-
-const rows = [
-  createData(
-    "July Wellness",
-    "Wellness Event",
-    new Date(),
-    "Batam fkajsdf f;kalsjdf faljsd"
-  ),
-];
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
-  const accessToken = getLocalStorage("access_token");
   // Initialize State
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [actionType, setActionType] = useState("");
-  const [data, setData] = useState();
 
   const listHead: ListHead[] = [
     {
@@ -80,6 +67,9 @@ const Dashboard: React.FC = () => {
     },
   ];
 
+  // Fetch Data
+  const { data } = useSWR(() => "/api/events");
+
   // Handle show button
   const handleShowButton = (type: string, label: string) => {
     let bgColor = Colors.gery100;
@@ -97,27 +87,6 @@ const Dashboard: React.FC = () => {
         bgColor = Colors.gery100;
         break;
     }
-
-    useEffect(() => {
-      if (!accessToken) router.push("/login");
-
-      const getEvent = async () => {
-        try {
-          const endpoint =
-            `${process.env.NEXT_PUBLIC_RESTURL_API_SERVER}/events` || "";
-          const { data } = await axios.get(endpoint, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
-          console.log(data);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-
-      getEvent();
-    }, [accessToken]);
 
     return (
       <Box
@@ -144,21 +113,41 @@ const Dashboard: React.FC = () => {
     );
   };
 
+  if (!data) return <Typography variant="h2">Loading........</Typography>;
+
   return (
     <>
       <Box marginTop="24px">
         <Table sx={{ borderCollapse: "separate", borderSpacing: "0 21px" }}>
-          <TableHead>
+          <TableHead sx={{ position: "relative" }}>
             <TableRow>
               {listHead.map((item) => (
                 <TableCell align={item.align} key={`${item.id}-heading`}>
                   {item.title}
                 </TableCell>
               ))}
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                position="absolute"
+                top="16px"
+                right="3px"
+                borderRadius="7px"
+                padding="3px"
+                sx={{
+                  backgroundColor: Colors.darkBlue,
+                  cursor: "pointer",
+                  "&:hover": { opacity: 0.9 },
+                }}
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus color={Colors.blue} />
+              </Box>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => (
+            {data.events.map((row: dataType) => (
               <TableRow
                 key={row.name}
                 sx={{
@@ -206,21 +195,20 @@ const Dashboard: React.FC = () => {
         </Table>
 
         {/* START - Pagination */}
-        <Box display="flex" justifyContent="end">
+        <Box display="flex" justifyContent="end" margin="32px 0px 48px">
           <Pagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
-            pageLimit={Math.ceil(20 / 10)}
+            pageLimit={Math.ceil(data.count / 10)}
           />
         </Box>
         {/* END - Pagination */}
       </Box>
 
       {/* START - Event Modal Creation */}
-      <BookingModal
+      <EventModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        handleClick={() => {}}
       />
       {/* END - Event Modal Creation */}
 

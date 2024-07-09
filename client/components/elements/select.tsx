@@ -21,6 +21,7 @@ interface CustomSelectProps {
   error?: string;
   handleChange?: (event: SelectChangeEvent<string>) => void;
   IconComponent?: React.ElementType;
+  returnValue?: "id" | "name";
 }
 
 const StyledFormControl = styled(FormControl)<{ value: string }>(
@@ -88,6 +89,7 @@ const CustomSelect: React.FC<CustomSelectProps> = React.memo(
     handleChange,
     IconComponent,
     loading,
+    returnValue = "id",
   }) => {
     const [state, setState] = useState(propValue);
 
@@ -126,7 +128,7 @@ const CustomSelect: React.FC<CustomSelectProps> = React.memo(
         >
           {data &&
             data.map((item) => (
-              <MenuItem key={item.id} value={item.id}>
+              <MenuItem key={item.id} value={item[returnValue]}>
                 {item.name}
               </MenuItem>
             ))}

@@ -5,37 +5,42 @@ import { Button, TextField } from "components/elements";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import CheckSession from "services/check-session";
 import { Colors } from "styles/theme/color";
-import { getLocalStorage, setLocalStorage } from "utils/local-storage";
 
 const LoginPage = () => {
   const router = useRouter();
-  const acessToken = getLocalStorage("access_token");
+  // Check user session
+  CheckSession();
+  // Initialize State
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
 
+  // Event on change handler
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
+  // Handle hit Login button
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      const endpoint =
-        `${process.env.NEXT_PUBLIC_RESTURL_API_SERVER}/auth/login` || "";
-      const response = await axios.post(endpoint, form, {
-        withCredentials: true,
+      const formData = new FormData();
+      formData.append("email", form.email);
+      formData.append("password", form.password);
+
+      const response = await axios.post("/api/auth/login", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       if (response.status) {
-        setLocalStorage("access_token", response.data.token);
-        setLocalStorage("user_role", response.data.role);
-
         router.push("/");
       }
 
@@ -45,10 +50,6 @@ const LoginPage = () => {
       setError(e.response && e.response.data && e.response.data.message);
     }
   };
-
-  useEffect(() => {
-    if (acessToken) router.push("/");
-  }, []);
 
   return (
     <Box maxWidth="40%" margin="auto" padding="74px 0px">

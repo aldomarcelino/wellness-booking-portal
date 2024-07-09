@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import dayjs from "dayjs";
+import React, { useCallback, useState, useEffect } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -9,18 +9,22 @@ import { Colors } from "styles/theme/color";
 interface DateFieldProps {
   inputFormat?: string;
   label?: string;
-  value?: Date | null;
-  onChange: (date: Date | null) => void;
+  value?: Dayjs | null;
+  onChange: (date: Dayjs | null) => void;
 }
 
 const DateField: React.FC<DateFieldProps> = React.memo(
-  ({ inputFormat = "dd/MM/yyyy", label, value = new Date(), onChange }) => {
+  ({ label, value = dayjs(), onChange }) => {
     const today = dayjs().subtract(0, "day");
 
-    const [val, setVal] = useState<Date | null>(value);
+    const [val, setVal] = useState<Dayjs | null>(value);
+
+    useEffect(() => {
+      setVal(value);
+    }, [value]);
 
     const handleChange = useCallback(
-      (newValue: Date | null) => {
+      (newValue: Dayjs | null) => {
         setVal(newValue);
         onChange(newValue);
       },
@@ -35,8 +39,10 @@ const DateField: React.FC<DateFieldProps> = React.memo(
             sx={{ color: Colors.darkGrey, marginTop: "10px" }}
           >
             <DateTimePicker
+              value={val}
               defaultValue={today}
               views={["year", "month", "day", "hours", "minutes"]}
+              onChange={handleChange}
             />
           </DemoItem>
         </DemoContainer>
