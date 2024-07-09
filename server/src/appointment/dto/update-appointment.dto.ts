@@ -1,33 +1,28 @@
-import {
-  IsEmpty,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { Category } from '../schemas/appointment.schema';
+import { IsEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { User } from '../../auth/schemas/user.schema';
 
-export class UpdateBookDto {
+export class UpdateEventDto {
   @IsOptional()
   @IsString()
-  readonly title: string;
+  readonly name: string;
 
   @IsOptional()
   @IsString()
-  readonly description: string;
+  readonly type: string;
+
+  @IsOptional()
+  readonly event_date: Date;
 
   @IsOptional()
   @IsString()
-  readonly author: string;
+  readonly location: string;
 
   @IsOptional()
   @IsNumber()
-  readonly price: number;
+  readonly status: string;
 
   @IsOptional()
-  @IsEnum(Category, { message: 'Please enter correct category.' })
-  readonly category: Category;
+  readonly rejected_reason: string;
 
   @IsEmpty({ message: 'You cannot pass user id' })
   readonly user: User;

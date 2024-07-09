@@ -121,6 +121,8 @@ interface CustomTextFieldProps {
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   maxLength?: number;
+  value?: any;
+  name?: string;
 }
 
 const CustomTextField: React.FC<CustomTextFieldProps> = ({
@@ -136,6 +138,8 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
   onClick,
   onBlur,
   maxLength,
+  value,
+  name,
 }) => {
   return (
     <>
@@ -145,6 +149,8 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
         </Typography>
       )}
       <Component
+        value={value}
+        name={name}
         type={type}
         variant="filled"
         label={placeholder}

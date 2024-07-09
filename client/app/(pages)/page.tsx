@@ -12,6 +12,11 @@ import { Colors } from "styles/theme/color";
 import { Pagination } from "components/elements";
 import BookingModal from "components/layout/modal/book-creation-modal";
 import TimeFormatter from "utils/time-formatter";
+import VerificationModal from "components/layout/modal/verify-action-modal";
+import { getLocalStorage } from "utils/local-storage";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface ListHead {
   id: number;
@@ -38,9 +43,14 @@ const rows = [
 ];
 
 const Dashboard: React.FC = () => {
+  const router = useRouter();
+  const accessToken = getLocalStorage("access_token");
   // Initialize State
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [actionType, setActionType] = useState("");
+  const [data, setData] = useState();
 
   const listHead: ListHead[] = [
     {
@@ -69,6 +79,70 @@ const Dashboard: React.FC = () => {
       align: "left",
     },
   ];
+
+  // Handle show button
+  const handleShowButton = (type: string, label: string) => {
+    let bgColor = Colors.gery100;
+    const value = type.toLocaleLowerCase();
+    switch (value) {
+      case "reject":
+        bgColor = Colors.red100;
+        break;
+
+      case "approve":
+        bgColor = Colors.green100;
+        break;
+
+      default:
+        bgColor = Colors.gery100;
+        break;
+    }
+
+    useEffect(() => {
+      if (!accessToken) router.push("/login");
+
+      const getEvent = async () => {
+        try {
+          const endpoint =
+            `${process.env.NEXT_PUBLIC_RESTURL_API_SERVER}/events` || "";
+          const { data } = await axios.get(endpoint, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          console.log(data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      getEvent();
+    }, [accessToken]);
+
+    return (
+      <Box
+        display="flex"
+        padding="8px"
+        justifyContent="center"
+        borderRadius="9px"
+        width="100%"
+        sx={{
+          backgroundColor: bgColor,
+          color: Colors.white,
+          cursor: "pointer",
+          "&:hover": {
+            opacity: 0.9,
+          },
+        }}
+        onClick={() => {
+          setShowVerifyModal(true);
+          setActionType(type);
+        }}
+      >
+        {label}
+      </Box>
+    );
+  };
 
   return (
     <>
@@ -113,6 +187,7 @@ const Dashboard: React.FC = () => {
                 <TableCell align="left">
                   {TimeFormatter(row.event_date)}
                 </TableCell>
+                <TableCell align="left">{row.location}</TableCell>
                 <TableCell
                   sx={{
                     borderTopRightRadius: "9px",
@@ -120,7 +195,10 @@ const Dashboard: React.FC = () => {
                   }}
                   align="left"
                 >
-                  {row.location}
+                  <Box display="flex" gap="8px" width="100%">
+                    {handleShowButton("Approve", "Approve")}
+                    <>{handleShowButton("Reject", "Reject")}</>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -145,6 +223,15 @@ const Dashboard: React.FC = () => {
         handleClick={() => {}}
       />
       {/* END - Event Modal Creation */}
+
+      {/* START - Verification Modal */}
+      <VerificationModal
+        open={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        handleClick={() => {}}
+        actionType={actionType}
+      />
+      {/* END -Verification Modal */}
     </>
   );
 };

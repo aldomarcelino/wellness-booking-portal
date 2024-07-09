@@ -5,6 +5,8 @@ import { Colors } from "styles/theme/color";
 import { Image, Menu } from "components/elements";
 import { Bell, ChevronDown, Search } from "lucide-react";
 import styled from "@emotion/styled";
+import { removeLocalStorage } from "utils/local-storage";
+import { useRouter } from "next/navigation";
 
 const StyledTextField = styled(TextField)`
   width: 100%;
@@ -22,10 +24,19 @@ const StyledTextField = styled(TextField)`
 `;
 
 const Header = () => {
+  const router = useRouter();
   const itemList = [
     { id: 1, label: "Profile", handleClick: () => {} },
     { id: 2, label: "Setting", handleClick: () => {} },
-    { id: 3, label: "Logout", handleClick: () => {} },
+    {
+      id: 3,
+      label: "Logout",
+      handleClick: () => {
+        removeLocalStorage("access_token");
+        removeLocalStorage("user_role");
+        router.push("/login");
+      },
+    },
   ];
 
   return (

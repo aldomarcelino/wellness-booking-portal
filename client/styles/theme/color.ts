@@ -10,6 +10,7 @@ export const Colors = {
   greySecond: "#F5F4F1",
   lightGrey: "#F8F8F8",
   darkGrey: "#79859D",
+  gery100: "#545f73",
   gery80: "#D0D8D8",
 
   // bloe
@@ -33,4 +34,7 @@ export const Colors = {
 
   // red
   red100: "#FF5D62",
+
+  // green
+  green100: "#2cc591",
 };

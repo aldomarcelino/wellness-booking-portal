@@ -7,7 +7,7 @@ import styled from "@emotion/styled";
 const SidebarItem = styled(Box)`
   dispaly: flex;
   align-items: center;
-  padding: 12px;
+  padding: 0px 12px;
   border-radius: 8px;
   cursor: pointer;
   justify-content: space-between;
@@ -32,9 +32,7 @@ const Sidebar = () => {
         width: "256px",
       }}
     >
-      <Box
-        sx={{ display: "flex", flexDirection: "column", margin: "42px 0px" }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box position="relative" sx={{ height: "104px", width: "100%" }}>
           <Image
             layout="fill"
@@ -50,21 +48,14 @@ const Sidebar = () => {
             <Box
               sx={{ display: "flex", alignItems: "center", margin: "8px 0px" }}
             >
-              <p style={{ fontSize: "14px", lineHeight: "20px" }}>Setting</p>
+              <p style={{ fontSize: "14px", lineHeight: "20px" }}>Dashboard</p>
             </Box>
           </SidebarItem>
           <SidebarItem>
             <Box
               sx={{ display: "flex", alignItems: "center", margin: "8px 0px" }}
             >
-              <p style={{ fontSize: "14px", lineHeight: "20px" }}>Setting</p>
-            </Box>
-          </SidebarItem>
-          <SidebarItem>
-            <Box
-              sx={{ display: "flex", alignItems: "center", margin: "8px 0px" }}
-            >
-              <p style={{ fontSize: "14px", lineHeight: "20px" }}>Setting</p>
+              <p style={{ fontSize: "14px", lineHeight: "20px" }}>Profile</p>
             </Box>
           </SidebarItem>
         </Box>

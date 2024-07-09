@@ -3,7 +3,6 @@ import { Box, Modal, Typography } from "@mui/material";
 import styled from "@emotion/styled";
 import { Button, DateField, Select, TextField } from "components/elements";
 import { Colors } from "styles/theme/color";
-import { X } from "lucide-react";
 
 interface BookingProps {
   open: boolean;
@@ -39,19 +38,6 @@ const BookingModal: React.FC<BookingProps> = ({
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="modal-revmove-image">
       <Component width="544px" padding="32px">
-        <Box position="relative">
-          <Box
-            position="absolute"
-            right="0"
-            top="0"
-            zIndex="1"
-            style={{ cursor: "pointer" }}
-            onClick={onClose}
-          >
-            <X size={24} />
-          </Box>
-        </Box>
-
         <Typography variant="h3" fontWeight={600} fontSize="32px">
           Creat Event
         </Typography>
