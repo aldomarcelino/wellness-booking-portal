@@ -49,11 +49,17 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit}>
           <TextField
             label="Email"
-            width="100%"
+            type="email"
             placeholder="aldo.marcelino@mailinator.com"
+            width="100%"
           />
           <Box marginTop="24px">
-            <TextField label="Password" width="100%" placeholder="••••" />
+            <TextField
+              label="Password"
+              type="password"
+              placeholder="••••"
+              width="100%"
+            />
           </Box>
 
           <Typography

@@ -18,7 +18,7 @@ export const Colors = {
   darkBlue: "#1F2B5B",
   darkBlue80: "#293978",
   darkBlue60: "#2e4087",
-  darkBlue40: "#334796",
+  darkBlue40: "#5369c4",
   darkBlue20: "#5369c4",
   lightBlue: "#D8E2F6",
   gradientBlue: "linear-gradient(270deg, #3A9DD1, #408EC7, #3C70B7 100%)",
