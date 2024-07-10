@@ -11,12 +11,14 @@ export default function CheckSession() {
       try {
         const response = await axios.get("/api/auth/check-session");
 
-        setRole(response.data.user_role);
         if (response.status === 200) {
+          setRole(response.data.user_role);
+          console.log("masuk sini");
+
           router.push("/");
         }
       } catch (error) {
-        console.log("User is not logged in");
+        router.replace("/login");
       }
     };
 
