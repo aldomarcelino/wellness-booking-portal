@@ -16,3 +16,13 @@ ADMIN
 
 - "email": "admin@mailinator.com",
 - "password": "admin#123",
+
+TO add event type
+
+hit: http://localhost:5000/types
+method: POST
+
+exp payload:
+{
+"name":"Health Talk"
+}

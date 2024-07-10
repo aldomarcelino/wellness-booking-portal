@@ -42,7 +42,10 @@ export class EventService {
       .limit(resPerPage)
       .skip(skip);
 
-    const count = await this.eventModel.countDocuments({ ...keyword });
+    const count = await this.eventModel.countDocuments({
+      ...keyword,
+      ...userFilter,
+    });
 
     return {
       events,

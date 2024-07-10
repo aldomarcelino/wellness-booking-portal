@@ -5,6 +5,7 @@ import { Button, DateField, Select, TextField } from "components/elements";
 import { Colors } from "styles/theme/color";
 import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
+import useSWR from "swr";
 
 interface BookingProps {
   open: boolean;
@@ -39,6 +40,9 @@ const BookingModal: React.FC<BookingProps> = ({ open, onClose, refetch }) => {
   const [eventDate, setEventDate] = React.useState<Dayjs | null>(
     dayjs(new Date())
   );
+
+  // Fetch List Types
+  const { data } = useSWR(() => "/api/types");
 
   // Event on change handler
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,11 +124,7 @@ const BookingModal: React.FC<BookingProps> = ({ open, onClose, refetch }) => {
               label="Event type"
               handleChange={(e) => setForm({ ...form, type: e.target.value })}
               placeholder="Select event type"
-              data={[
-                { id: "1", name: "Health Talk" },
-                { id: "2", name: "Wellness Events" },
-                { id: "3", name: "Fitness Activities" },
-              ]}
+              data={data}
               loading={false}
               returnValue="name"
             />
