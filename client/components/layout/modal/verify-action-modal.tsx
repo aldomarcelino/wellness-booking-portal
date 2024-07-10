@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { Box, Modal, Typography } from "@mui/material";
 import styled from "@emotion/styled";
 import { TextField } from "components/elements";
@@ -8,8 +9,9 @@ import { X } from "lucide-react";
 interface BookingProps {
   open: boolean;
   onClose: () => void;
-  handleClick: () => void;
   actionType: string;
+  currentId: string;
+  refetch: () => void;
 }
 
 const Component = styled(Box)(
@@ -30,11 +32,53 @@ const Component = styled(Box)(
 const VerificationModal: React.FC<BookingProps> = ({
   open,
   onClose,
-  handleClick,
   actionType,
+  currentId,
+  refetch,
 }) => {
+  // Initialize State
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Clear state handler
+  const handleCancel = () => {
+    setError("");
+    setReason("");
+    setLoading(false);
+    onClose();
+  };
+
   // Handle create event form
-  const handleSubmit = () => {};
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError("");
+
+    if (actionType === "Reject" && !reason) {
+      setError("The rejected reason is required");
+      return;
+    }
+    try {
+      let endpoint = "/api/events/update";
+      if (actionType === "Cancel") {
+        endpoint = "/api/events/delete";
+      }
+      const formData = { status: actionType + "ed", id: currentId, reason };
+      const response = await axios.put(endpoint, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status) {
+        setLoading(false);
+        refetch();
+        handleCancel();
+      }
+    } catch (e: any) {
+      setLoading(false);
+      setError(e.response && e.response.data && e.response.data.message);
+    }
+  };
 
   const handleShowButton = () => {
     let bgColor = Colors.gery100;
@@ -68,14 +112,15 @@ const VerificationModal: React.FC<BookingProps> = ({
             opacity: 0.9,
           },
         }}
+        onClick={handleSubmit}
       >
-        {actionType}
+        {loading ? "Loading" : actionType}
       </Box>
     );
   };
 
   return (
-    <Modal open={open} aria-labelledby="modal-revmove-image">
+    <Modal open={open} aria-labelledby="modal-verify-event">
       <Component width="544px" padding="32px">
         <Box position="relative">
           <Box
@@ -84,7 +129,7 @@ const VerificationModal: React.FC<BookingProps> = ({
             top="0"
             zIndex="1"
             style={{ cursor: "pointer" }}
-            onClick={onClose}
+            onClick={handleCancel}
           >
             <X size={24} />
           </Box>
@@ -94,15 +139,27 @@ const VerificationModal: React.FC<BookingProps> = ({
           Are You Sure ?
         </Typography>
         <Typography variant="body2" marginBottom="40px">
-          {`By click the button below  you will '${actionType}' this event.`}
+          {`By clicking the button below  you will '${actionType}' this event.`}
         </Typography>
         {actionType === "Reject" && (
           <TextField
+            name="reason"
+            value={reason}
+            handleChange={(e) => setReason(e.target.value)}
             label="Rejected Reason"
             placeholder="The event's date collides with shceduled event."
             width="100%"
           />
         )}
+
+        <Typography
+          variant="body2"
+          color={Colors.red100}
+          margin="8px 0px"
+          textAlign="center"
+        >
+          {error}
+        </Typography>
 
         <Box justifyContent="center" marginTop="24px">
           {handleShowButton()}

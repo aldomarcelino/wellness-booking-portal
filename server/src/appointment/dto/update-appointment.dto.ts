@@ -1,4 +1,4 @@
-import { IsEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEmpty, IsOptional, IsString } from 'class-validator';
 import { User } from '../../auth/schemas/user.schema';
 
 export class UpdateEventDto {
@@ -18,7 +18,7 @@ export class UpdateEventDto {
   readonly location: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   readonly status: string;
 
   @IsOptional()

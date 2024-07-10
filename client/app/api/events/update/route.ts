@@ -2,20 +2,18 @@ import axios from "axios";
 import { NextResponse, NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   const session = cookies().get("session")?.value;
 
   const formData = await request.formData();
-  const name = formData.get("name");
-  const type = formData.get("type");
-  const event_date = formData.get("event_date");
-  const location = formData.get("location");
   const status = formData.get("status");
+  const id = formData.get("id");
+  const reason = formData.get("reason");
 
   try {
-    await axios.post(
-      `${process.env.NEXT_PUBLIC_RESTURL_API_SERVER}/events`,
-      { name, type, event_date, location, status },
+    await axios.put(
+      `${process.env.NEXT_PUBLIC_RESTURL_API_SERVER}/events/${id}`,
+      { status, reason },
       { withCredentials: true, headers: { Authorization: `Bearer ${session}` } }
     );
 

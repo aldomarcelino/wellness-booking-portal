@@ -5,6 +5,9 @@ import { Document } from 'mongoose';
   timestamps: true,
 })
 export class User extends Document {
+  toHexString() {
+    throw new Error('Method not implemented.');
+  }
   @Prop()
   name: string;
 

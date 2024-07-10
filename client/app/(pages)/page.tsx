@@ -15,8 +15,8 @@ import { Pagination } from "components/elements";
 import EventModal from "components/layout/modal/event-creation-modal";
 import TimeFormatter from "utils/time-formatter";
 import VerificationModal from "components/layout/modal/verify-action-modal";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import CheckSession from "services/check-session";
 
 interface ListHead {
   id: number;
@@ -25,19 +25,22 @@ interface ListHead {
 }
 
 interface dataType {
+  _id: string;
   name: string;
   type: string;
   event_date: Date;
   location: string;
+  status: string;
 }
 
 const Dashboard: React.FC = () => {
-  const router = useRouter();
+  const { role } = CheckSession();
   // Initialize State
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [actionType, setActionType] = useState("");
+  const [currentId, setCurrentId] = useState("");
 
   const listHead: ListHead[] = [
     {
@@ -68,10 +71,10 @@ const Dashboard: React.FC = () => {
   ];
 
   // Fetch Data
-  const { data } = useSWR(() => "/api/events");
+  const { data, mutate } = useSWR(() => "/api/events");
 
   // Handle show button
-  const handleShowButton = (type: string, label: string) => {
+  const handleShowButton = (type: string, id: string) => {
     let bgColor = Colors.gery100;
     const value = type.toLocaleLowerCase();
     switch (value) {
@@ -106,10 +109,21 @@ const Dashboard: React.FC = () => {
         onClick={() => {
           setShowVerifyModal(true);
           setActionType(type);
+          setCurrentId(id);
         }}
       >
-        {label}
+        {type}
       </Box>
+    );
+  };
+
+  const handleShowStatus = (status: string) => {
+    let color = Colors.green100;
+    if (status === "Rejected") color = Colors.red100;
+    return (
+      <Typography variant="body2" color={color} textAlign="center">
+        {status}
+      </Typography>
     );
   };
 
@@ -147,61 +161,83 @@ const Dashboard: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.events.map((row: dataType) => (
-              <TableRow
-                key={row.name}
-                sx={{
-                  backgroundColor: "white",
-                  transition: "0.5s all ease",
-                  "&:hover": {
-                    boxShadow: Colors.shadow,
-                  },
-                  "& td, & th": {
-                    border: 0,
-                    overflow: "hidden",
-                  },
-                }}
-              >
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{
-                    borderTopLeftRadius: "9px",
-                    borderBottomLeftRadius: "9px",
-                  }}
-                >
-                  {row.name}
-                </TableCell>
-                <TableCell align="left">{row.type}</TableCell>
-                <TableCell align="left">
-                  {TimeFormatter(row.event_date)}
-                </TableCell>
-                <TableCell align="left">{row.location}</TableCell>
-                <TableCell
-                  sx={{
-                    borderTopRightRadius: "9px",
-                    borderBottomRightRadius: "9px",
-                  }}
-                  align="left"
-                >
-                  <Box display="flex" gap="8px" width="100%">
-                    {handleShowButton("Approve", "Approve")}
-                    <>{handleShowButton("Reject", "Reject")}</>
-                  </Box>
+            {data.events.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Typography margin="100px 0px" textAlign="center">
+                    No data
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              <>
+                {data.events.map((row: dataType) => (
+                  <TableRow
+                    key={row.name}
+                    sx={{
+                      backgroundColor: "white",
+                      transition: "0.5s all ease",
+                      "&:hover": {
+                        boxShadow: Colors.shadow,
+                      },
+                      "& td, & th": {
+                        border: 0,
+                        overflow: "hidden",
+                      },
+                    }}
+                  >
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      sx={{
+                        borderTopLeftRadius: "9px",
+                        borderBottomLeftRadius: "9px",
+                      }}
+                    >
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="left">{row.type}</TableCell>
+                    <TableCell align="left">
+                      {TimeFormatter(row.event_date)}
+                    </TableCell>
+                    <TableCell align="left">{row.location}</TableCell>
+                    <TableCell
+                      sx={{
+                        borderTopRightRadius: "9px",
+                        borderBottomRightRadius: "9px",
+                      }}
+                      align="left"
+                    >
+                      {row.status === "Pending Review" && role === "Admin" ? (
+                        <Box display="flex" gap="8px" width="100%">
+                          {handleShowButton("Approve", row._id)}
+                          <>{handleShowButton("Reject", row._id)}</>
+                        </Box>
+                      ) : (
+                        <>
+                          {row.status === "Pending Review"
+                            ? handleShowButton("Cancel", row._id)
+                            : handleShowStatus(row.status)}
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )}
           </TableBody>
         </Table>
 
         {/* START - Pagination */}
-        <Box display="flex" justifyContent="end" margin="32px 0px 48px">
-          <Pagination
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageLimit={Math.ceil(data.count / 10)}
-          />
-        </Box>
+        {data.events.length && (
+          <Box display="flex" justifyContent="end" margin="32px 0px 48px">
+            <Pagination
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              pageLimit={Math.ceil(data.count / 10)}
+            />
+          </Box>
+        )}
         {/* END - Pagination */}
       </Box>
 
@@ -209,6 +245,7 @@ const Dashboard: React.FC = () => {
       <EventModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+        refetch={mutate}
       />
       {/* END - Event Modal Creation */}
 
@@ -216,8 +253,9 @@ const Dashboard: React.FC = () => {
       <VerificationModal
         open={showVerifyModal}
         onClose={() => setShowVerifyModal(false)}
-        handleClick={() => {}}
+        currentId={currentId}
         actionType={actionType}
+        refetch={mutate}
       />
       {/* END -Verification Modal */}
     </>

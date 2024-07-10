@@ -1,15 +1,17 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function CheckSession() {
   const router = useRouter();
-  let response: any;
+  const [role, setRole] = useState<string>("");
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        response = await axios.get("/api/auth/check-session");
+        const response = await axios.get("/api/auth/check-session");
+
+        setRole(response.data.user_role);
         if (response.status === 200) {
           router.push("/");
         }
@@ -19,7 +21,7 @@ export default function CheckSession() {
     };
 
     checkSession();
-  }, []);
+  }, [router]);
 
-  return (response && response.user_role) || "";
+  return { role };
 }

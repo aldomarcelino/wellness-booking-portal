@@ -9,6 +9,7 @@ import axios from "axios";
 interface BookingProps {
   open: boolean;
   onClose: () => void;
+  refetch: () => void;
 }
 
 const Component = styled(Box)(
@@ -26,7 +27,7 @@ const Component = styled(Box)(
 `
 );
 
-const BookingModal: React.FC<BookingProps> = ({ open, onClose }) => {
+const BookingModal: React.FC<BookingProps> = ({ open, onClose, refetch }) => {
   // Initialize State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -79,6 +80,7 @@ const BookingModal: React.FC<BookingProps> = ({ open, onClose }) => {
       });
       if (response.status) {
         setLoading(false);
+        refetch();
         handleCancel();
       }
     } catch (e: any) {
@@ -88,7 +90,11 @@ const BookingModal: React.FC<BookingProps> = ({ open, onClose }) => {
   };
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="modal-revmove-image">
+    <Modal
+      open={open}
+      onClose={handleCancel}
+      aria-labelledby="modal-event-creation"
+    >
       <Component width="544px" padding="32px">
         <Typography variant="h3" fontWeight={600} fontSize="32px">
           Creat Event

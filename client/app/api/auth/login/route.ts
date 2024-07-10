@@ -22,8 +22,11 @@ export async function POST(request: NextRequest) {
     // Save the session in a cookie
     cookies().set("session", response.data.token, options);
     cookies().set("role", response.data.role, options);
-    return NextResponse.json({ status: 200, message: "success" });
+    return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (e: any) {
-    return NextResponse.json({ status: 400, message: e });
+    return NextResponse.json(
+      { message: e.response.data.message },
+      { status: 400 }
+    );
   }
 }

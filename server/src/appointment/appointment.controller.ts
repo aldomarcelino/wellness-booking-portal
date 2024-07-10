@@ -41,29 +41,34 @@ export class EventController {
     return this.eventService.create(event, req.user);
   }
 
-  // @Get(':id')
-  // async getBook(
-  //   @Param('id')
-  //   id: string,
-  // ): Promise<Event> {
-  //   return this.eventService.findById(id);
-  // }
+  @Get(':id')
+  @UseGuards(AuthGuard())
+  async getEvent(
+    @Param('id')
+    id: string,
+  ): Promise<Event> {
+    return this.eventService.findById(id);
+  }
 
-  // @Put(':id')
-  // async updateBook(
-  //   @Param('id')
-  //   id: string,
-  //   @Body()
-  //   event: UpdateEventDto,
-  // ): Promise<Event> {
-  //   return this.eventService.updateById(id, event);
-  // }
+  @Put(':id')
+  @UseGuards(AuthGuard())
+  async updateEvent(
+    @Param('id')
+    id: string,
+    @Body()
+    event: UpdateEventDto,
+    @Req() req,
+  ): Promise<Event> {
+    return this.eventService.updateById(id, event, req.user);
+  }
 
-  // @Delete(':id')
-  // async deleteBook(
-  //   @Param('id')
-  //   id: string,
-  // ): Promise<Event> {
-  //   return this.eventService.deleteById(id);
-  // }
+  @Delete(':id')
+  @UseGuards(AuthGuard())
+  async deleteEvent(
+    @Param('id')
+    id: string,
+    @Req() req,
+  ): Promise<Event> {
+    return this.eventService.deleteById(id, req.user);
+  }
 }
