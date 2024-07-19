@@ -117,7 +117,7 @@ const BookingModal: React.FC<BookingProps> = ({ open, onClose, refetch }) => {
             width="100%"
           />
 
-          <Box marginTop="24px">
+          <Box margin="24px 0px 20px">
             <Select
               name="type"
               value={form.type}

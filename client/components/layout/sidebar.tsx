@@ -46,7 +46,12 @@ const Sidebar = () => {
         >
           <SidebarItem>
             <Box
-              sx={{ display: "flex", alignItems: "center", margin: "8px 0px" }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                margin: "8px 0px",
+                color: Colors.blue,
+              }}
             >
               <p style={{ fontSize: "14px", lineHeight: "20px" }}>Dashboard</p>
             </Box>

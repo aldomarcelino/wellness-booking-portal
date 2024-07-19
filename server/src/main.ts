@@ -9,11 +9,11 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:3000', // Specify the client's origin
+    origin: 'http://localhost:3001', // Specify the client's origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  await app.listen(5000);
+  await app.listen(3000);
 }
 bootstrap();

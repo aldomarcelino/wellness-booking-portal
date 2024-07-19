@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import {
   Box,
@@ -9,6 +9,7 @@ import {
   TableRow,
   TableBody,
   Typography,
+  Skeleton,
 } from "@mui/material";
 import { Colors } from "styles/theme/color";
 import { Pagination } from "components/elements";
@@ -41,6 +42,7 @@ const Dashboard: React.FC = () => {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [actionType, setActionType] = useState("");
   const [currentId, setCurrentId] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const listHead: ListHead[] = [
     {
@@ -127,7 +129,11 @@ const Dashboard: React.FC = () => {
     );
   };
 
-  if (!data) return <Typography variant="h2">Loading........</Typography>;
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  if (loading) return "";
 
   return (
     <>
@@ -136,7 +142,16 @@ const Dashboard: React.FC = () => {
           <TableHead sx={{ position: "relative" }}>
             <TableRow>
               {listHead.map((item) => (
-                <TableCell align={item.align} key={`${item.id}-heading`}>
+                <TableCell
+                  sx={{
+                    textTransform: "uppercase",
+                    fontWeight: 600,
+                    fontSize: 16,
+                    color: Colors.darkGrey,
+                  }}
+                  align={item.align}
+                  key={`${item.id}-heading`}
+                >
                   {item.title}
                 </TableCell>
               ))}
@@ -161,7 +176,37 @@ const Dashboard: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.events.length === 0 ? (
+            {!data ? (
+              <>
+                {[...Array(7)].map((_, id) => (
+                  <TableRow
+                    key={`${id}-TableRow`}
+                    sx={{
+                      cursor: "pointer",
+                      backgroundColor: "white",
+                      transition: "0.5s all ease",
+                      "&:hover": {
+                        boxShadow: Colors.shadow,
+                      },
+                      "& td, & th": {
+                        border: 0,
+                        overflow: "hidden",
+                      },
+                    }}
+                  >
+                    {[...Array(5)].map((_, idx) => (
+                      <TableCell key={`${idx}-TableCell`}>
+                        <Skeleton
+                          data-testid="skeleton"
+                          height="21px"
+                          variant="rectangular"
+                        />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
+            ) : data.events.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5}>
                   <Typography margin="100px 0px" textAlign="center">
@@ -200,7 +245,9 @@ const Dashboard: React.FC = () => {
                     <TableCell align="left">
                       {TimeFormatter(row.event_date)}
                     </TableCell>
-                    <TableCell align="left">{row.location}</TableCell>
+                    <TableCell align="left">
+                      <Box maxWidth="200px">{row.location}</Box>
+                    </TableCell>
                     <TableCell
                       sx={{
                         borderTopRightRadius: "9px",
@@ -229,7 +276,7 @@ const Dashboard: React.FC = () => {
         </Table>
 
         {/* START - Pagination */}
-        {data.events.length && (
+        {data?.events.length ? (
           <Box display="flex" justifyContent="end" margin="32px 0px 48px">
             <Pagination
               currentPage={currentPage}
@@ -237,6 +284,8 @@ const Dashboard: React.FC = () => {
               pageLimit={Math.ceil(data.count / 10)}
             />
           </Box>
+        ) : (
+          ""
         )}
         {/* END - Pagination */}
       </Box>
